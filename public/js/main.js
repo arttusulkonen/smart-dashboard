@@ -47,11 +47,22 @@ function initDashboard() {
 
     setupModals();
 
-    function updateData() {
+    function updateData(isManual) {
+        var now = new Date();
+        var currentHour = now.getHours();
+
+        if (!isManual && currentHour >= 0 && currentHour < 7) {
+            return;
+        }
+
         if (config.weatherApiKey && config.lat && config.lon) {
-            fetchWeather(config.weatherApiKey, config.lat, config.lon, config.units, function(result) {
-                renderWeatherWidgets(result);
-            });
+            if (typeof fetchWeather === 'function') {
+                fetchWeather(config.weatherApiKey, config.lat, config.lon, config.units, function(result) {
+                    if (typeof renderWeatherWidgets === 'function') {
+                        renderWeatherWidgets(result);
+                    }
+                });
+            }
         }
         
         if (config.transitApiKey && config.transitStopId && typeof fetchTransit === 'function') {
@@ -63,10 +74,14 @@ function initDashboard() {
         }
     }
 
-    window.refreshDashboard = updateData;
+    window.refreshDashboard = function() {
+        updateData(true);
+    };
 
-    updateData();
-    setInterval(updateData, 300000);
+    updateData(true);
+    setInterval(function() {
+        updateData(false);
+    }, 300000);
 }
 
 window.onload = initDashboard;

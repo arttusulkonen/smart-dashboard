@@ -2,7 +2,7 @@ function fetchWeather(apiKey, lat, lon, units, callback) {
     if (!apiKey || !lat || !lon || !callback) return;
     
     var xhr = new XMLHttpRequest();
-    var url = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&exclude=minutely,alerts&units=' + units + '&appid=' + apiKey;
+    var url = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + lat + '&lon=' + lon + '&units=' + units + '&appid=' + apiKey;
     
     xhr.open('GET', url, true);
     xhr.onreadystatechange = function() {
@@ -80,6 +80,8 @@ function renderWeatherWidgets(result) {
     var city = data.timezone ? data.timezone.split('/')[1].replace('_', ' ') : 'Location';
     
     var current = data.current;
+    if (!current || !current.weather || !current.weather[0]) return;
+
     var temp = Math.round(current.temp);
     var feels = Math.round(current.feels_like);
     var condition = current.weather[0].main;
@@ -106,6 +108,8 @@ function renderWeatherWidgets(result) {
     
     for (var i = 0; i < Math.min(data.hourly.length, 48); i++) {
         var hItem = data.hourly[i];
+        if (!hItem || !hItem.weather || !hItem.weather[0]) continue;
+
         var itemDate = new Date(hItem.dt * 1000);
         var hTime = itemDate.getHours() + ':00';
         var hTemp = Math.round(hItem.temp);
@@ -139,10 +143,10 @@ function renderWeatherWidgets(result) {
             var containerRect = scrollContainer.getBoundingClientRect();
             var centerTarget = containerRect.left + 30;
 
-            for (var i = 0; i < items.length; i++) {
-                var rect = items[i].getBoundingClientRect();
+            for (var j = 0; j < items.length; j++) {
+                var rect = items[j].getBoundingClientRect();
                 if (rect.left <= centerTarget && rect.right >= centerTarget) {
-                    var dayName = items[i].getAttribute('data-day');
+                    var dayName = items[j].getAttribute('data-day');
                     if (dayName && dayLabel.innerText !== dayName) {
                         dayLabel.innerText = dayName;
                     }
@@ -167,10 +171,12 @@ function renderWeatherWidgets(result) {
     var dHtml = '';
     var dModalHtml = '<h2>8-Day Forecast</h2>';
     
-    for (var j = 0; j < Math.min(data.daily.length, 5); j++) {
-        var dItem = data.daily[j];
+    for (var k = 0; k < Math.min(data.daily.length, 5); k++) {
+        var dItem = data.daily[k];
+        if (!dItem || !dItem.temp || !dItem.weather || !dItem.weather[0]) continue;
+
         var dDateObj = new Date(dItem.dt * 1000);
-        var dayNameDaily = j === 0 ? 'Today' : dayNames[dDateObj.getDay()];
+        var dayNameDaily = k === 0 ? 'Today' : dayNames[dDateObj.getDay()];
         var dMin = Math.round(dItem.temp.min);
         var dMax = Math.round(dItem.temp.max);
         var dIconDaily = getConditionIcon(dItem.weather[0].main);
@@ -191,8 +197,10 @@ function renderWeatherWidgets(result) {
     var cyclModalHtml = '<h2>Cycling Conditions</h2>';
     var walkModalHtml = '<h2>Walking Conditions</h2>';
 
-    for (var k = 0; k < Math.min(data.hourly.length, 24); k++) {
-        var aItem = data.hourly[k];
+    for (var m = 0; m < Math.min(data.hourly.length, 24); m++) {
+        var aItem = data.hourly[m];
+        if (!aItem || !aItem.weather || !aItem.weather[0]) continue;
+
         var aDateObj = new Date(aItem.dt * 1000);
         var aTime = aDateObj.getHours() + ':00';
         var aDayName = (aDateObj.getDay() === currentDayIndex) ? 'Today' : dayNames[aDateObj.getDay()];
