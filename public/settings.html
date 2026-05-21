@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Settings - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="settings-page">
+    <div class="settings-container">
+      <h1>Dashboard Settings</h1>
+
+      <div class="settings-group">
+        <h3>Weather (OpenWeatherMap)</h3>
+        <label>API Key:</label>
+        <input type="text" id="input-weather-key" />
+
+        <label>Latitude:</label>
+        <input type="text" id="input-lat" />
+
+        <label>Longitude:</label>
+        <input type="text" id="input-lon" />
+
+        <label>Temperature Unit:</label>
+        <select id="input-units">
+          <option value="metric">Celsius (°C)</option>
+          <option value="imperial">Fahrenheit (°F)</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <h3>Transit (HSL)</h3>
+        <label>API Key:</label>
+        <input type="text" id="input-transit-key" />
+
+        <label>Stop ID (e.g. HSL:1040129):</label>
+        <input type="text" id="input-stop-id" />
+      </div>
+
+      <div class="settings-actions">
+        <button id="save-btn" class="btn-primary">Save Settings</button>
+        <button id="back-btn" class="btn-secondary">Back to Dashboard</button>
+      </div>
+    </div>
+
+    <script src="js/settings.js"></script>
+  </body>
+</html>
