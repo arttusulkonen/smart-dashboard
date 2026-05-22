@@ -76,7 +76,7 @@ export function renderTransit(result, elementId) {
     var data = result.data;
     if (!data) return;
 
-    var html = '';
+    var html = '<h2>DEPARTURES</h2>';
     var now = new Date();
     var secondsSinceMidnight = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
@@ -154,7 +154,7 @@ export function renderTransit(result, elementId) {
         }
     }
 
-    if (html === '') {
+    if (html === '<h2>DEPARTURES</h2>') {
         html = '<h2>DEPARTURES</h2><p>No transit data available.</p>';
     }
 

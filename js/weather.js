@@ -5,60 +5,43 @@ export function fetchWeather(apiKey, lat, lon, units, callback) {
     
     var targetUrl = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&units=' + encodeURIComponent(units) + '&appid=' + encodeURIComponent(apiKey);
     
-    function makeRequest(url, isProxy) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.withCredentials = false;
-        xhr.timeout = 15000;
-        
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    var response = null;
-                    try {
-                        response = JSON.parse(xhr.responseText);
-                    } catch (e) {
-                        callback({ error: 'Parse Error' });
-                        return;
-                    }
-                    if (response && response.current && response.hourly) {
-                        callback({ data: response, units: units });
-                    } else {
-                        callback({ error: 'Invalid Data Format' });
-                    }
-                } else if (xhr.status === 0 && !isProxy) {
-                    var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-                    makeRequest(proxyUrl, true);
-                } else if (xhr.status !== 0) {
-                    callback({ error: 'API Error: ' + xhr.status });
-                } else {
-                    callback({ error: 'Network/SSL Error' });
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', targetUrl, true);
+    xhr.withCredentials = false;
+    xhr.timeout = 15000;
+    
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var response = null;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                } catch (e) {
+                    callback({ error: 'Parse Error' });
+                    return;
                 }
-            }
-        };
-        
-        xhr.onerror = function() {
-            if (!isProxy) {
-                var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-                makeRequest(proxyUrl, true);
+                if (response && response.current && response.hourly) {
+                    callback({ data: response, units: units });
+                } else {
+                    callback({ error: 'Invalid Data Format' });
+                }
+            } else if (xhr.status === 0) {
+                callback({ error: 'Network/SSL Error' });
             } else {
-                callback({ error: 'Network Error (CORS/SSL)' });
+                callback({ error: 'API Error: ' + xhr.status });
             }
-        };
+        }
+    };
+    
+    xhr.onerror = function() {
+        callback({ error: 'Network Error (CORS/SSL)' });
+    };
 
-        xhr.ontimeout = function() {
-            if (!isProxy) {
-                var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
-                makeRequest(proxyUrl, true);
-            } else {
-                callback({ error: 'Connection Timeout' });
-            }
-        };
-        
-        xhr.send();
-    }
-
-    makeRequest(targetUrl, false);
+    xhr.ontimeout = function() {
+        callback({ error: 'Connection Timeout' });
+    };
+    
+    xhr.send();
 }
 
 export function renderWeatherWidgets(result) {

@@ -11,8 +11,12 @@ var firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-if (firebaseConfig.apiKey && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+if (firebaseConfig.apiKey) {
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+} else {
+    console.warn('Firebase configuration missing in .env file. Running in local-only mode.');
 }
 
 export default firebase;

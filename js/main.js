@@ -102,7 +102,7 @@ function initDashboard() {
             });
         } else {
             var transitModule = document.getElementById('transit-module');
-            if (transitModule) transitModule.innerHTML = '<p class="error-text">Configure Transit API in Settings</p>';
+            if (transitModule) transitModule.innerHTML = '<h2>DEPARTURES</h2><p class="error-text">Configure Transit API in Settings</p>';
         }
     }
 
@@ -110,34 +110,38 @@ function initDashboard() {
         fetchAndRenderData(true);
     };
 
-    firebase.auth().onAuthStateChanged(function(user) {
-        if (user) {
-            var db = firebase.firestore();
-            db.collection('users').doc(user.uid).get().then(function(doc) {
-                if (doc.exists) {
-                    var data = doc.data();
-                    config.weatherApiKey = data.weatherApiKey || '';
-                    config.lat = data.lat || '';
-                    config.lon = data.lon || '';
-                    config.units = data.units || 'metric';
-                    config.transitApiKey = data.transitApiKey || '';
-                    config.transitStopId = data.transitStopId || '';
-                    
-                    localStorage.setItem('weatherApiKey', config.weatherApiKey);
-                    localStorage.setItem('lat', config.lat);
-                    localStorage.setItem('lon', config.lon);
-                    localStorage.setItem('units', config.units);
-                    localStorage.setItem('transitApiKey', config.transitApiKey);
-                    localStorage.setItem('transitStopId', config.transitStopId);
-                }
-                fetchAndRenderData(true);
-            }).catch(function() {
-                fetchAndRenderData(true);
-            });
-        } else {
-            window.location.href = 'login.html';
-        }
-    });
+    if (firebase.apps.length > 0) {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                var db = firebase.firestore();
+                db.collection('users').doc(user.uid).get().then(function(doc) {
+                    if (doc.exists) {
+                        var data = doc.data();
+                        config.weatherApiKey = data.weatherApiKey || '';
+                        config.lat = data.lat || '';
+                        config.lon = data.lon || '';
+                        config.units = data.units || 'metric';
+                        config.transitApiKey = data.transitApiKey || '';
+                        config.transitStopId = data.transitStopId || '';
+                        
+                        localStorage.setItem('weatherApiKey', config.weatherApiKey);
+                        localStorage.setItem('lat', config.lat);
+                        localStorage.setItem('lon', config.lon);
+                        localStorage.setItem('units', config.units);
+                        localStorage.setItem('transitApiKey', config.transitApiKey);
+                        localStorage.setItem('transitStopId', config.transitStopId);
+                    }
+                    fetchAndRenderData(true);
+                }).catch(function() {
+                    fetchAndRenderData(true);
+                });
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+    } else {
+        fetchAndRenderData(true);
+    }
 
     setInterval(function() {
         fetchAndRenderData(false);

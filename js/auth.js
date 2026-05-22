@@ -14,6 +14,11 @@ function initAuth() {
         authMessage.style.color = isError ? '#ff453a' : '#32d74b';
     }
 
+    if (!firebase.apps.length) {
+        showMessage('Firebase is not configured. Check .env variables.', true);
+        return;
+    }
+
     firebase.auth().onAuthStateChanged(function(user) {
         if (user) {
             window.location.href = 'index.html';
