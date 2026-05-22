@@ -1,46 +1,32 @@
 import { calculateActivityStatus, escapeHTML, getConditionIcon } from './utils.js';
 
 export function fetchWeather(apiKey, lat, lon, units, callback) {
-    if (!apiKey || lat === null || lat === undefined || lat === '' || lon === null || lon === undefined || lon === '' || !callback) return;
-    
-    var targetUrl = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&units=' + encodeURIComponent(units) + '&appid=' + encodeURIComponent(apiKey);
+    if (!apiKey || !lat || !lon || !callback) return;
+
+    var fullUrl = 'https://us-central1-smart-dashboard-da63e.cloudfunctions.net/getweatherdata' + 
+                  '?lat=' + encodeURIComponent(lat) + 
+                  '&lon=' + encodeURIComponent(lon) + 
+                  '&units=' + encodeURIComponent(units) + 
+                  '&appid=' + encodeURIComponent(apiKey);
     
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', targetUrl, true);
-    xhr.withCredentials = false;
-    xhr.timeout = 15000;
+    xhr.open('GET', fullUrl, true);
+    xhr.setRequestHeader('Accept', 'application/json');
     
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                var response = null;
                 try {
-                    response = JSON.parse(xhr.responseText);
+                    callback({ data: JSON.parse(xhr.responseText), units: units });
                 } catch (e) {
                     callback({ error: 'Parse Error' });
-                    return;
                 }
-                if (response && response.current && response.hourly) {
-                    callback({ data: response, units: units });
-                } else {
-                    callback({ error: 'Invalid Data Format' });
-                }
-            } else if (xhr.status === 0) {
-                callback({ error: 'Network/SSL Error' });
             } else {
-                callback({ error: 'API Error: ' + xhr.status });
+                callback({ error: 'Status ' + xhr.status });
             }
         }
     };
-    
-    xhr.onerror = function() {
-        callback({ error: 'Network Error (CORS/SSL)' });
-    };
-
-    xhr.ontimeout = function() {
-        callback({ error: 'Connection Timeout' });
-    };
-    
+    xhr.onerror = function() { callback({ error: 'Network Error' }); };
     xhr.send();
 }
 

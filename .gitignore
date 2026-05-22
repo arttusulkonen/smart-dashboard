@@ -86,3 +86,4 @@ output/
 
 dist
 package-lock.json
+functions/node_modules
