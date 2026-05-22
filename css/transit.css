@@ -1,0 +1,59 @@
+#transit-module {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#transit-module::-webkit-scrollbar {
+    width: 6px;
+}
+
+#transit-module::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.retro-style {
+    background-color: #0a0a0a;
+    border: 2px solid #222222;
+    font-family: "Courier New", Courier, monospace;
+    text-transform: uppercase;
+}
+
+.retro-style h2 {
+    color: #ff9900;
+    text-shadow: 0 0 8px rgba(255, 153, 0, 0.5);
+    border-bottom: 1px dashed #ff9900;
+    padding-bottom: 15px;
+    font-size: 22px;
+    position: sticky;
+    top: 0;
+    background-color: #0a0a0a;
+    margin: -24px -24px 20px -24px;
+    padding: 24px 24px 15px 24px;
+    z-index: 10;
+}
+
+.transit-stop-group {
+    margin-bottom: 30px;
+}
+
+.transit-stop-group:last-child {
+    margin-bottom: 0;
+}
+
+.retro-style p {
+    color: #33ff33;
+    text-shadow: 0 0 8px rgba(51, 255, 51, 0.3);
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 12px 0;
+    font-size: 18px;
+}
+
+.retro-time {
+    color: #ff3333;
+    text-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
+    font-weight: bold;
+}
