@@ -4,7 +4,6 @@
 
 .clock-time {
     font-size: 5vw;
-    max-font-size: 72px;
     font-weight: 200;
     letter-spacing: 2px;
     color: #ffffff;
@@ -13,10 +12,27 @@
 
 .clock-date {
     font-size: 1.2vw;
-    max-font-size: 18px;
     color: #0a84ff;
     margin-top: 5px;
     text-transform: uppercase;
     letter-spacing: 2px;
     font-weight: 600;
+}
+
+@media screen and (min-width: 1440px) {
+    .clock-time {
+        font-size: 72px;
+    }
+    .clock-date {
+        font-size: 18px;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .clock-time {
+        font-size: 64px;
+    }
+    .clock-date {
+        font-size: 16px;
+    }
 }

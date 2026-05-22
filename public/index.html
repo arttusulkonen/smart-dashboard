@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="css/clock.css" />
     <link rel="stylesheet" href="css/weather.css" />
     <link rel="stylesheet" href="css/transit.css" />
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="js/firebase-init.js"></script>
   </head>
   <body>
     <button id="nav-settings-btn" aria-label="Settings">⚙</button>
@@ -19,7 +24,12 @@
 
       <div class="dashboard-grid">
         <div class="col-left">
-          <div id="widget-current" class="widget clickable">
+          <div
+            id="widget-current"
+            class="widget clickable"
+            tabindex="0"
+            role="button"
+          >
             <p>Loading weather...</p>
           </div>
 
@@ -27,16 +37,25 @@
             <div
               id="widget-walking"
               class="widget clickable activity-widget"
+              tabindex="0"
+              role="button"
             ></div>
             <div
               id="widget-cycling"
               class="widget clickable activity-widget"
+              tabindex="0"
+              role="button"
             ></div>
           </div>
         </div>
 
         <div class="col-right">
-          <div id="widget-hourly" class="widget clickable"></div>
+          <div
+            id="widget-hourly"
+            class="widget clickable"
+            tabindex="0"
+            role="button"
+          ></div>
 
           <div id="transit-module" class="widget retro-style">
             <h2>DEPARTURES</h2>

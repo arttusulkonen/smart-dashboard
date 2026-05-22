@@ -1,5 +1,15 @@
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function fetchWeather(apiKey, lat, lon, units, callback) {
-    if (!apiKey || !lat || !lon || !callback) return;
+    if (!apiKey || lat === null || lat === undefined || lat === '' || lon === null || lon === undefined || lon === '' || !callback) return;
     
     var xhr = new XMLHttpRequest();
     var url = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&units=' + encodeURIComponent(units) + '&appid=' + encodeURIComponent(apiKey);
@@ -28,6 +38,36 @@ function fetchWeather(apiKey, lat, lon, units, callback) {
     xhr.send();
 }
 
+function getConditionIcon(condition) {
+    if (!condition) return '☁️';
+    var lower = condition.toLowerCase();
+    if (lower.indexOf('clear') > -1) return '☀️';
+    if (lower.indexOf('cloud') > -1) return '☁️';
+    if (lower.indexOf('rain') > -1) return '🌧';
+    if (lower.indexOf('snow') > -1) return '❄️';
+    if (lower.indexOf('thunder') > -1) return '⛈';
+    return '☁️';
+}
+
+function calculateActivityStatus(temp, wind, condition, type, units) {
+    var isImperial = units === 'imperial';
+    
+    var windLimit = isImperial ? (type === 'cycling' ? 15 : 22) : (type === 'cycling' ? 7 : 10);
+    var coldLimit = isImperial ? (type === 'cycling' ? 32 : 14) : (type === 'cycling' ? 0 : -10);
+    var coolLimit = isImperial ? (type === 'cycling' ? 50 : 41) : (type === 'cycling' ? 10 : 5);
+
+    if (condition === 'Rain' || condition === 'Thunderstorm') return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Rain' };
+    if (condition === 'Snow') return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Snow' };
+    
+    if (wind > windLimit) return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'High Wind' };
+    if (temp < coldLimit) return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Freezing' };
+    
+    if (temp < coolLimit) return { status: 'Moderate', cls: 'status-moderate', face: '😐', reason: 'Chilly' };
+    if (type === 'cycling' && wind > (windLimit * 0.7)) return { status: 'Moderate', cls: 'status-moderate', face: '😐', reason: 'Breezy' };
+    
+    return { status: 'Good', cls: 'status-good', face: '😀', reason: 'Optimal' };
+}
+
 function renderWeatherWidgets(result) {
     if (!result) return;
     
@@ -46,7 +86,19 @@ function renderWeatherWidgets(result) {
     var data = result.data;
     var units = result.units;
 
-    var cityRaw = data.timezone ? data.timezone.split('/')[1].replace('_', ' ') : 'Location';
+    var cityRaw = 'Location';
+    if (data && data.timezone) {
+        if (data.timezone.indexOf('/') > -1) {
+            var tzParts = data.timezone.split('/');
+            if (tzParts.length > 1 && tzParts[1]) {
+                cityRaw = tzParts[1].replace(/_/g, ' ');
+            } else {
+                cityRaw = data.timezone;
+            }
+        } else {
+            cityRaw = data.timezone;
+        }
+    }
     var city = escapeHTML(cityRaw);
     
     var current = data.current;

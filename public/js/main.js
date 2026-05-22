@@ -5,20 +5,40 @@ function setupModals() {
     
     if (!overlay || !closeBtn || !modalBody) return;
 
+    function openModal(element) {
+        var content = element.dataset.modalHtml;
+        if (content) {
+            modalBody.innerHTML = content;
+            overlay.classList.remove('hidden');
+            closeBtn.focus();
+        }
+    }
+
     var clickableWidgets = document.querySelectorAll('.clickable');
     for (var i = 0; i < clickableWidgets.length; i++) {
         clickableWidgets[i].onclick = function(e) {
-            if (e.target.tagName.toLowerCase() === 'button') return;
-            var content = this.dataset.modalHtml;
-            if (content) {
-                modalBody.innerHTML = content;
-                overlay.classList.remove('hidden');
+            if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'button') return;
+            openModal(this);
+        };
+        
+        clickableWidgets[i].onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13 || e.keyCode === 32) {
+                if (e.target && e.target.tagName && e.target.tagName.toLowerCase() === 'button') return;
+                e.preventDefault();
+                openModal(this);
             }
         };
     }
 
     closeBtn.onclick = function() {
         overlay.classList.add('hidden');
+    };
+    
+    closeBtn.onkeydown = function(e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13 || e.keyCode === 32) {
+            e.preventDefault();
+            overlay.classList.add('hidden');
+        }
     };
 
     overlay.onclick = function(e) {
@@ -51,7 +71,7 @@ function initDashboard() {
         initClock();
     }
 
-    function updateData(isManual) {
+    function fetchAndRenderData(isManual) {
         var now = new Date();
         var currentHour = now.getHours();
 
@@ -93,12 +113,44 @@ function initDashboard() {
     }
 
     window.refreshDashboard = function() {
-        updateData(true);
+        fetchAndRenderData(true);
     };
 
-    updateData(true);
+    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                var db = firebase.firestore();
+                db.collection('users').doc(user.uid).get().then(function(doc) {
+                    if (doc.exists) {
+                        var data = doc.data();
+                        config.weatherApiKey = data.weatherApiKey || '';
+                        config.lat = data.lat || '';
+                        config.lon = data.lon || '';
+                        config.units = data.units || 'metric';
+                        config.transitApiKey = data.transitApiKey || '';
+                        config.transitStopId = data.transitStopId || '';
+                        
+                        localStorage.setItem('weatherApiKey', config.weatherApiKey);
+                        localStorage.setItem('lat', config.lat);
+                        localStorage.setItem('lon', config.lon);
+                        localStorage.setItem('units', config.units);
+                        localStorage.setItem('transitApiKey', config.transitApiKey);
+                        localStorage.setItem('transitStopId', config.transitStopId);
+                    }
+                    fetchAndRenderData(true);
+                }).catch(function() {
+                    fetchAndRenderData(true);
+                });
+            } else {
+                fetchAndRenderData(true);
+            }
+        });
+    } else {
+        fetchAndRenderData(true);
+    }
+
     setInterval(function() {
-        updateData(false);
+        fetchAndRenderData(false);
     }, 300000);
 }
 

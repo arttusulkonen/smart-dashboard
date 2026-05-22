@@ -1,3 +1,13 @@
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function fetchTransit(stopIdsStr, apiKey, callback) {
     if (!stopIdsStr || !apiKey || !callback) return;
     
@@ -5,16 +15,16 @@ function fetchTransit(stopIdsStr, apiKey, callback) {
     var queryParts = [];
     
     for (var i = 0; i < stops.length; i++) {
-        var sId = stops[i].trim();
+        var sId = stops[i].replace(/[^a-zA-Z0-9:-]/g, '').trim();
         if (sId) {
-            queryParts.push('stop' + i + ': stop(id: "' + sId + '") { name stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay realtime realtimeState pickupType dropoffType headsign trip { route { shortName } } } }');
+            queryParts.push('stop' + i + ': stop(id: "' + sId + '") { name stoptimesWithoutPatterns { scheduledArrival realtimeArrival arrivalDelay realtime realtimeState pickupType dropoffType headsign stop { platformCode } trip { route { shortName } } } }');
         }
     }
     
     if (queryParts.length === 0) return;
     
     var xhr = new XMLHttpRequest();
-    var url = 'https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql';
+    var url = 'https://api.digitransit.fi/routing/v2/hsl/gtfs/v1';
     
     var payload = JSON.stringify({
         query: 'query {' + queryParts.join(' ') + '}'
@@ -71,33 +81,54 @@ function renderTransit(result, elementId) {
             if (!stopData || !stopData.stoptimesWithoutPatterns) continue;
 
             html += '<div class="transit-stop-group">';
-            html += '<h2>DEP: ' + escapeHTML(stopData.name || 'UNKNOWN') + '</h2>';
+            html += '<h2>' + escapeHTML(stopData.name || 'STATION') + '</h2>';
             
             var times = stopData.stoptimesWithoutPatterns;
-            var count = 0;
+            var platforms = {};
             
             for (var i = 0; i < times.length; i++) {
-                if (count >= 5) break;
-                
                 var timeData = times[i];
                 if (!timeData || !timeData.trip || !timeData.trip.route) continue;
                 
-                var routeName = escapeHTML(timeData.trip.route.shortName || '');
-                var headsign = escapeHTML(timeData.headsign || '');
-                
-                var arrivalTime = timeData.realtimeArrival !== null && timeData.realtimeArrival !== undefined ? timeData.realtimeArrival : timeData.scheduledArrival;
-                if (arrivalTime === null || arrivalTime === undefined) continue;
-                
-                var waitSeconds = arrivalTime - secondsSinceMidnight;
-                if (waitSeconds < 0) {
-                    waitSeconds += 86400;
+                var platCode = (timeData.stop && timeData.stop.platformCode) ? timeData.stop.platformCode : 'N/A';
+                if (!platforms[platCode]) {
+                    platforms[platCode] = [];
                 }
+                platforms[platCode].push(timeData);
+            }
+            
+            var platformKeys = Object.keys(platforms).sort();
+            
+            for (var p = 0; p < platformKeys.length; p++) {
+                var pKey = platformKeys[p];
+                var pTimes = platforms[pKey];
                 
-                var waitMinutes = Math.floor(waitSeconds / 60);
-                var timeDisplay = waitMinutes <= 0 ? 'NOW' : escapeHTML(waitMinutes) + ' MIN';
+                var trackLabel = pKey === 'N/A' ? 'Departures' : 'Track ' + pKey;
+                html += '<h3 style="color:#0a84ff; font-size:16px; margin:15px 0 5px 0;">' + escapeHTML(trackLabel) + '</h3>';
                 
-                html += '<p><span>' + routeName + ' ' + headsign.substring(0, 15) + '</span> <span class="retro-time">' + timeDisplay + '</span></p>';
-                count++;
+                var count = 0;
+                for (var j = 0; j < pTimes.length; j++) {
+                    if (count >= 5) break;
+                    
+                    var tData = pTimes[j];
+                    var routeName = escapeHTML(tData.trip.route.shortName || '');
+                    var rawHeadsign = tData.headsign || '';
+                    var headsign = escapeHTML(rawHeadsign.substring(0, 15));
+                    
+                    var arrivalTime = tData.realtimeArrival !== null && tData.realtimeArrival !== undefined ? tData.realtimeArrival : tData.scheduledArrival;
+                    if (arrivalTime === null || arrivalTime === undefined) continue;
+                    
+                    var waitSeconds = arrivalTime - secondsSinceMidnight;
+                    if (waitSeconds < 0) {
+                        waitSeconds += 86400;
+                    }
+                    
+                    var waitMinutes = Math.floor(waitSeconds / 60);
+                    var timeDisplay = waitMinutes <= 0 ? 'NOW' : escapeHTML(waitMinutes) + ' MIN';
+                    
+                    html += '<p><span>' + routeName + ' ' + headsign + '</span> <span class="retro-time">' + timeDisplay + '</span></p>';
+                    count++;
+                }
             }
 
             if (times.length === 0) {
