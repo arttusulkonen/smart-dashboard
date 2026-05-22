@@ -132,10 +132,6 @@ p {
     align-items: center;
 }
 
-#modal-overlay.hidden {
-    display: none;
-}
-
 #modal-content {
     background-color: #1c1c1e;
     border-radius: 24px;
@@ -304,4 +300,8 @@ button.btn-primary:active, button.btn-secondary:active {
     #transit-module {
         max-height: 500px;
     }
+}
+
+.hidden {
+    display: none !important;
 }

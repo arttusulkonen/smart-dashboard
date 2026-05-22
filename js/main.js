@@ -1,3 +1,8 @@
+import firebase from '../firebase-init.js';
+import { initClock } from './clock.js';
+import { fetchTransit, renderTransit } from './transit.js';
+import { fetchWeather, renderWeatherWidgets } from './weather.js';
+
 function setupModals() {
     var overlay = document.getElementById('modal-overlay');
     var closeBtn = document.getElementById('modal-close');
@@ -66,10 +71,7 @@ function initDashboard() {
     }
 
     setupModals();
-    
-    if (typeof initClock === 'function') {
-        initClock();
-    }
+    initClock();
 
     function fetchAndRenderData(isManual) {
         var now = new Date();
@@ -80,13 +82,9 @@ function initDashboard() {
         }
 
         if (config.weatherApiKey && config.lat && config.lon) {
-            if (typeof fetchWeather === 'function') {
-                fetchWeather(config.weatherApiKey, config.lat, config.lon, config.units, function(result) {
-                    if (typeof renderWeatherWidgets === 'function') {
-                        renderWeatherWidgets(result);
-                    }
-                });
-            }
+            fetchWeather(config.weatherApiKey, config.lat, config.lon, config.units, function(result) {
+                renderWeatherWidgets(result);
+            });
         } else {
             var wCurrent = document.getElementById('widget-current');
             if (wCurrent) wCurrent.innerHTML = '<p class="error-text">Configure Weather API in Settings</p>';
@@ -99,13 +97,9 @@ function initDashboard() {
         }
         
         if (config.transitApiKey && config.transitStopId) {
-            if (typeof fetchTransit === 'function') {
-                fetchTransit(config.transitStopId, config.transitApiKey, function(result) {
-                    if (typeof renderTransit === 'function') {
-                        renderTransit(result, 'transit-module');
-                    }
-                });
-            }
+            fetchTransit(config.transitStopId, config.transitApiKey, function(result) {
+                renderTransit(result, 'transit-module');
+            });
         } else {
             var transitModule = document.getElementById('transit-module');
             if (transitModule) transitModule.innerHTML = '<p class="error-text">Configure Transit API in Settings</p>';
@@ -116,38 +110,34 @@ function initDashboard() {
         fetchAndRenderData(true);
     };
 
-    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                var db = firebase.firestore();
-                db.collection('users').doc(user.uid).get().then(function(doc) {
-                    if (doc.exists) {
-                        var data = doc.data();
-                        config.weatherApiKey = data.weatherApiKey || '';
-                        config.lat = data.lat || '';
-                        config.lon = data.lon || '';
-                        config.units = data.units || 'metric';
-                        config.transitApiKey = data.transitApiKey || '';
-                        config.transitStopId = data.transitStopId || '';
-                        
-                        localStorage.setItem('weatherApiKey', config.weatherApiKey);
-                        localStorage.setItem('lat', config.lat);
-                        localStorage.setItem('lon', config.lon);
-                        localStorage.setItem('units', config.units);
-                        localStorage.setItem('transitApiKey', config.transitApiKey);
-                        localStorage.setItem('transitStopId', config.transitStopId);
-                    }
-                    fetchAndRenderData(true);
-                }).catch(function() {
-                    fetchAndRenderData(true);
-                });
-            } else {
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            var db = firebase.firestore();
+            db.collection('users').doc(user.uid).get().then(function(doc) {
+                if (doc.exists) {
+                    var data = doc.data();
+                    config.weatherApiKey = data.weatherApiKey || '';
+                    config.lat = data.lat || '';
+                    config.lon = data.lon || '';
+                    config.units = data.units || 'metric';
+                    config.transitApiKey = data.transitApiKey || '';
+                    config.transitStopId = data.transitStopId || '';
+                    
+                    localStorage.setItem('weatherApiKey', config.weatherApiKey);
+                    localStorage.setItem('lat', config.lat);
+                    localStorage.setItem('lon', config.lon);
+                    localStorage.setItem('units', config.units);
+                    localStorage.setItem('transitApiKey', config.transitApiKey);
+                    localStorage.setItem('transitStopId', config.transitStopId);
+                }
                 fetchAndRenderData(true);
-            }
-        });
-    } else {
-        fetchAndRenderData(true);
-    }
+            }).catch(function() {
+                fetchAndRenderData(true);
+            });
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
 
     setInterval(function() {
         fetchAndRenderData(false);

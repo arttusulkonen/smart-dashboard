@@ -1,4 +1,4 @@
-function updateClock() {
+export function updateClock() {
     var clockEl = document.getElementById('widget-clock');
     if (!clockEl) return;
     
@@ -19,7 +19,7 @@ function updateClock() {
     clockEl.innerHTML = '<div class="clock-time">' + timeStr + '</div><div class="clock-date">' + dateStr + '</div>';
 }
 
-function initClock() {
+export function initClock() {
     updateClock();
     setInterval(updateClock, 1000);
 }

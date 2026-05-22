@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body class="settings-page">
+    <div class="settings-container">
+      <h1>Dashboard Settings</h1>
+      <p
+        id="auth-status-text"
+        style="
+          font-size: 14px;
+          color: #32d74b;
+          text-align: center;
+          margin-bottom: 20px;
+        "
+      ></p>
+
+      <div class="settings-group">
+        <h3>Weather (OpenWeatherMap)</h3>
+        <label for="input-weather-key">API Key:</label>
+        <input
+          type="password"
+          id="input-weather-key"
+          autocomplete="new-password"
+        />
+
+        <label for="input-lat">Latitude:</label>
+        <input type="text" id="input-lat" />
+
+        <label for="input-lon">Longitude:</label>
+        <input type="text" id="input-lon" />
+
+        <label for="input-units">Temperature Unit:</label>
+        <select id="input-units">
+          <option value="metric">Celsius (°C)</option>
+          <option value="imperial">Fahrenheit (°F)</option>
+        </select>
+      </div>
+
+      <div class="settings-group">
+        <h3>Transit (HSL)</h3>
+        <label for="input-transit-key">API Key:</label>
+        <input
+          type="password"
+          id="input-transit-key"
+          autocomplete="new-password"
+        />
+
+        <label for="input-stop-id"
+          >Stop IDs (comma separated, e.g. HSL:1040129):</label
+        >
+        <input type="text" id="input-stop-id" />
+      </div>
+
+      <div class="settings-actions">
+        <button id="save-btn" class="btn-primary">
+          Save to Cloud & Reload
+        </button>
+        <button id="back-btn" class="btn-secondary">Back to Dashboard</button>
+        <button
+          id="logout-btn"
+          class="btn-secondary"
+          style="border-color: #ff453a; color: #ff453a; margin-top: 20px"
+        >
+          Logout & Clear Cache
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="/js/settings.js"></script>
+  </body>
+</html>

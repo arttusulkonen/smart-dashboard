@@ -1,14 +1,6 @@
-function escapeHTML(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+import { escapeHTML } from './utils.js';
 
-function fetchTransit(stopIdsStr, apiKey, callback) {
+export function fetchTransit(stopIdsStr, apiKey, callback) {
     if (!stopIdsStr || !apiKey || !callback) return;
     
     var stops = stopIdsStr.split(',');
@@ -31,6 +23,8 @@ function fetchTransit(stopIdsStr, apiKey, callback) {
     });
     
     xhr.open('POST', url, true);
+    xhr.withCredentials = false;
+    xhr.timeout = 15000;
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.setRequestHeader('digitransit-subscription-key', apiKey);
     
@@ -49,15 +43,26 @@ function fetchTransit(stopIdsStr, apiKey, callback) {
                 } else {
                     callback({ error: 'No data returned' });
                 }
+            } else if (xhr.status === 0) {
+                callback({ error: 'Network/SSL Error' });
             } else {
                 callback({ error: 'API Error: ' + xhr.status });
             }
         }
     };
+    
+    xhr.onerror = function() {
+        callback({ error: 'Network Error (CORS/SSL)' });
+    };
+
+    xhr.ontimeout = function() {
+        callback({ error: 'Connection Timeout' });
+    };
+    
     xhr.send(payload);
 }
 
-function renderTransit(result, elementId) {
+export function renderTransit(result, elementId) {
     if (!result || !elementId) return;
     
     var container = document.getElementById(elementId);
@@ -81,7 +86,6 @@ function renderTransit(result, elementId) {
             if (!stopData || !stopData.stoptimesWithoutPatterns) continue;
 
             html += '<div class="transit-stop-group">';
-            html += '<h2>' + escapeHTML(stopData.name || 'STATION') + '</h2>';
             
             var times = stopData.stoptimesWithoutPatterns;
             var platforms = {};
@@ -104,7 +108,14 @@ function renderTransit(result, elementId) {
                 var pTimes = platforms[pKey];
                 
                 var trackLabel = pKey === 'N/A' ? 'Departures' : 'Track ' + pKey;
-                html += '<h3 style="color:#0a84ff; font-size:16px; margin:15px 0 5px 0;">' + escapeHTML(trackLabel) + '</h3>';
+                
+                if (pKey === '1') {
+                    trackLabel = 'Track 1 (Airport ✈️)';
+                } else if (pKey === '2') {
+                    trackLabel = 'Track 2 (Helsinki 🏙️)';
+                }
+                
+                html += '<h3 style="color:#0a84ff; font-size:16px; margin:15px 0 5px 0; padding-bottom:5px; border-bottom:1px solid #1a1a1a;">' + escapeHTML(trackLabel) + '</h3>';
                 
                 var count = 0;
                 for (var j = 0; j < pTimes.length; j++) {
@@ -118,15 +129,20 @@ function renderTransit(result, elementId) {
                     var arrivalTime = tData.realtimeArrival !== null && tData.realtimeArrival !== undefined ? tData.realtimeArrival : tData.scheduledArrival;
                     if (arrivalTime === null || arrivalTime === undefined) continue;
                     
+                    var absoluteSecs = arrivalTime % 86400;
+                    var h = Math.floor(absoluteSecs / 3600);
+                    var m = Math.floor((absoluteSecs % 3600) / 60);
+                    var absoluteTimeStr = (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+                    
                     var waitSeconds = arrivalTime - secondsSinceMidnight;
                     if (waitSeconds < 0) {
                         waitSeconds += 86400;
                     }
                     
                     var waitMinutes = Math.floor(waitSeconds / 60);
-                    var timeDisplay = waitMinutes <= 0 ? 'NOW' : escapeHTML(waitMinutes) + ' MIN';
+                    var relativeTimeStr = waitMinutes <= 0 ? 'NOW' : escapeHTML(waitMinutes) + ' min';
                     
-                    html += '<p><span>' + routeName + ' ' + headsign + '</span> <span class="retro-time">' + timeDisplay + '</span></p>';
+                    html += '<p><span>' + routeName + ' ' + headsign + '</span> <span class="retro-time">' + absoluteTimeStr + ' <span style="font-size:14px; opacity:0.7;">(' + relativeTimeStr + ')</span></span></p>';
                     count++;
                 }
             }

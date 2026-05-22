@@ -1,74 +1,67 @@
-function escapeHTML(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-}
+import { calculateActivityStatus, escapeHTML, getConditionIcon } from './utils.js';
 
-function fetchWeather(apiKey, lat, lon, units, callback) {
+export function fetchWeather(apiKey, lat, lon, units, callback) {
     if (!apiKey || lat === null || lat === undefined || lat === '' || lon === null || lon === undefined || lon === '' || !callback) return;
     
-    var xhr = new XMLHttpRequest();
-    var url = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&units=' + encodeURIComponent(units) + '&appid=' + encodeURIComponent(apiKey);
+    var targetUrl = 'https://api.openweathermap.org/data/3.0/onecall?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&units=' + encodeURIComponent(units) + '&appid=' + encodeURIComponent(apiKey);
     
-    xhr.open('GET', url, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                var response = null;
-                try {
-                    response = JSON.parse(xhr.responseText);
-                } catch (e) {
-                    callback({ error: 'Parse Error' });
-                    return;
-                }
-                if (response && response.current && response.hourly) {
-                    callback({ data: response, units: units });
+    function makeRequest(url, isProxy) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.withCredentials = false;
+        xhr.timeout = 15000;
+        
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    var response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        callback({ error: 'Parse Error' });
+                        return;
+                    }
+                    if (response && response.current && response.hourly) {
+                        callback({ data: response, units: units });
+                    } else {
+                        callback({ error: 'Invalid Data Format' });
+                    }
+                } else if (xhr.status === 0 && !isProxy) {
+                    var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                    makeRequest(proxyUrl, true);
+                } else if (xhr.status !== 0) {
+                    callback({ error: 'API Error: ' + xhr.status });
                 } else {
-                    callback({ error: 'Invalid Data Format' });
+                    callback({ error: 'Network/SSL Error' });
                 }
-            } else {
-                callback({ error: 'API Error: ' + xhr.status });
             }
-        }
-    };
-    xhr.send();
+        };
+        
+        xhr.onerror = function() {
+            if (!isProxy) {
+                var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                makeRequest(proxyUrl, true);
+            } else {
+                callback({ error: 'Network Error (CORS/SSL)' });
+            }
+        };
+
+        xhr.ontimeout = function() {
+            if (!isProxy) {
+                var proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                makeRequest(proxyUrl, true);
+            } else {
+                callback({ error: 'Connection Timeout' });
+            }
+        };
+        
+        xhr.send();
+    }
+
+    makeRequest(targetUrl, false);
 }
 
-function getConditionIcon(condition) {
-    if (!condition) return '☁️';
-    var lower = condition.toLowerCase();
-    if (lower.indexOf('clear') > -1) return '☀️';
-    if (lower.indexOf('cloud') > -1) return '☁️';
-    if (lower.indexOf('rain') > -1) return '🌧';
-    if (lower.indexOf('snow') > -1) return '❄️';
-    if (lower.indexOf('thunder') > -1) return '⛈';
-    return '☁️';
-}
-
-function calculateActivityStatus(temp, wind, condition, type, units) {
-    var isImperial = units === 'imperial';
-    
-    var windLimit = isImperial ? (type === 'cycling' ? 15 : 22) : (type === 'cycling' ? 7 : 10);
-    var coldLimit = isImperial ? (type === 'cycling' ? 32 : 14) : (type === 'cycling' ? 0 : -10);
-    var coolLimit = isImperial ? (type === 'cycling' ? 50 : 41) : (type === 'cycling' ? 10 : 5);
-
-    if (condition === 'Rain' || condition === 'Thunderstorm') return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Rain' };
-    if (condition === 'Snow') return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Snow' };
-    
-    if (wind > windLimit) return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'High Wind' };
-    if (temp < coldLimit) return { status: 'Poor', cls: 'status-poor', face: '☹️', reason: 'Freezing' };
-    
-    if (temp < coolLimit) return { status: 'Moderate', cls: 'status-moderate', face: '😐', reason: 'Chilly' };
-    if (type === 'cycling' && wind > (windLimit * 0.7)) return { status: 'Moderate', cls: 'status-moderate', face: '😐', reason: 'Breezy' };
-    
-    return { status: 'Good', cls: 'status-good', face: '😀', reason: 'Optimal' };
-}
-
-function renderWeatherWidgets(result) {
+export function renderWeatherWidgets(result) {
     if (!result) return;
     
     var wCurrent = document.getElementById('widget-current');

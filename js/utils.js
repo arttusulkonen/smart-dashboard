@@ -1,4 +1,4 @@
-function escapeHTML(str) {
+export function escapeHTML(str) {
     if (str === null || str === undefined) return '';
     return String(str)
         .replace(/&/g, '&amp;')
@@ -8,7 +8,7 @@ function escapeHTML(str) {
         .replace(/'/g, '&#039;');
 }
 
-function getConditionIcon(condition) {
+export function getConditionIcon(condition) {
     if (!condition) return '☁️';
     var lower = condition.toLowerCase();
     if (lower.indexOf('clear') > -1) return '☀️';
@@ -19,7 +19,7 @@ function getConditionIcon(condition) {
     return '☁️';
 }
 
-function calculateActivityStatus(temp, wind, condition, type, units) {
+export function calculateActivityStatus(temp, wind, condition, type, units) {
     var isImperial = units === 'imperial';
     
     var windLimit = isImperial ? (type === 'cycling' ? 15 : 22) : (type === 'cycling' ? 7 : 10);
