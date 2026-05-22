@@ -1,0 +1,22 @@
+#widget-clock {
+    text-align: center;
+}
+
+.clock-time {
+    font-size: 5vw;
+    max-font-size: 72px;
+    font-weight: 200;
+    letter-spacing: 2px;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.clock-date {
+    font-size: 1.2vw;
+    max-font-size: 18px;
+    color: #0a84ff;
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}

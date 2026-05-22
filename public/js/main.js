@@ -46,6 +46,10 @@ function initDashboard() {
     }
 
     setupModals();
+    
+    if (typeof initClock === 'function') {
+        initClock();
+    }
 
     function updateData(isManual) {
         var now = new Date();
@@ -63,14 +67,28 @@ function initDashboard() {
                     }
                 });
             }
+        } else {
+            var wCurrent = document.getElementById('widget-current');
+            if (wCurrent) wCurrent.innerHTML = '<p class="error-text">Configure Weather API in Settings</p>';
+            var wHourly = document.getElementById('widget-hourly');
+            if (wHourly) wHourly.innerHTML = '';
+            var wWalking = document.getElementById('widget-walking');
+            if (wWalking) wWalking.innerHTML = '';
+            var wCycling = document.getElementById('widget-cycling');
+            if (wCycling) wCycling.innerHTML = '';
         }
         
-        if (config.transitApiKey && config.transitStopId && typeof fetchTransit === 'function') {
-            fetchTransit(config.transitStopId, config.transitApiKey, function(result) {
-                if (typeof renderTransit === 'function') {
-                    renderTransit(result, 'transit-module');
-                }
-            });
+        if (config.transitApiKey && config.transitStopId) {
+            if (typeof fetchTransit === 'function') {
+                fetchTransit(config.transitStopId, config.transitApiKey, function(result) {
+                    if (typeof renderTransit === 'function') {
+                        renderTransit(result, 'transit-module');
+                    }
+                });
+            }
+        } else {
+            var transitModule = document.getElementById('transit-module');
+            if (transitModule) transitModule.innerHTML = '<p class="error-text">Configure Transit API in Settings</p>';
         }
     }
 

@@ -2,41 +2,64 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/clock.css" />
+    <link rel="stylesheet" href="css/weather.css" />
+    <link rel="stylesheet" href="css/transit.css" />
   </head>
   <body>
-    <button id="nav-settings-btn">⚙</button>
+    <button id="nav-settings-btn" aria-label="Settings">⚙</button>
 
     <div id="app">
-      <div class="col left-col">
-        <div id="widget-current" class="widget clickable">
-          <p>Loading weather...</p>
-        </div>
-        <div id="widget-hourly" class="widget clickable"></div>
-        <div id="widget-daily" class="widget clickable"></div>
+      <div class="top-bar">
+        <div id="widget-clock"></div>
       </div>
-      <div class="col right-col">
-        <div id="widget-cycling" class="widget clickable activity-widget"></div>
-        <div id="widget-walking" class="widget clickable activity-widget"></div>
-        <div id="transit-module" class="widget retro-style">
-          <h2>DEPARTURES</h2>
-          <p>Loading transit data...</p>
+
+      <div class="dashboard-grid">
+        <div class="col-left">
+          <div id="widget-current" class="widget clickable">
+            <p>Loading weather...</p>
+          </div>
+
+          <div class="activities-row">
+            <div
+              id="widget-walking"
+              class="widget clickable activity-widget"
+            ></div>
+            <div
+              id="widget-cycling"
+              class="widget clickable activity-widget"
+            ></div>
+          </div>
+        </div>
+
+        <div class="col-right">
+          <div id="widget-hourly" class="widget clickable"></div>
+
+          <div id="transit-module" class="widget retro-style">
+            <h2>DEPARTURES</h2>
+            <p>Loading transit data...</p>
+          </div>
         </div>
       </div>
     </div>
 
     <div id="modal-overlay" class="hidden">
-      <div id="modal-content">
-        <button id="modal-close">✕</button>
+      <div
+        id="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Details"
+      >
+        <button id="modal-close" aria-label="Close">✕</button>
         <div id="modal-body"></div>
       </div>
     </div>
 
+    <script src="js/utils.js"></script>
+    <script src="js/clock.js"></script>
     <script src="js/weather.js"></script>
     <script src="js/transit.js"></script>
     <script src="js/main.js"></script>

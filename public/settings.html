@@ -2,10 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Settings - Dashboard</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
@@ -15,16 +12,16 @@
 
       <div class="settings-group">
         <h3>Weather (OpenWeatherMap)</h3>
-        <label>API Key:</label>
+        <label for="input-weather-key">API Key:</label>
         <input type="text" id="input-weather-key" />
 
-        <label>Latitude:</label>
+        <label for="input-lat">Latitude:</label>
         <input type="text" id="input-lat" />
 
-        <label>Longitude:</label>
+        <label for="input-lon">Longitude:</label>
         <input type="text" id="input-lon" />
 
-        <label>Temperature Unit:</label>
+        <label for="input-units">Temperature Unit:</label>
         <select id="input-units">
           <option value="metric">Celsius (°C)</option>
           <option value="imperial">Fahrenheit (°F)</option>
@@ -33,10 +30,12 @@
 
       <div class="settings-group">
         <h3>Transit (HSL)</h3>
-        <label>API Key:</label>
+        <label for="input-transit-key">API Key:</label>
         <input type="text" id="input-transit-key" />
 
-        <label>Stop ID (e.g. HSL:1040129):</label>
+        <label for="input-stop-id"
+          >Stop IDs (comma separated, e.g. HSL:1040129, HSL:1040130):</label
+        >
         <input type="text" id="input-stop-id" />
       </div>
 

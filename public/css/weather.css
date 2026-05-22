@@ -1,0 +1,151 @@
+#widget-current {
+    flex: 1;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.activities-row {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 180px;
+}
+
+#widget-walking {
+    flex: 1;
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#widget-cycling {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#widget-hourly {
+    flex: 0 0 220px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#widget-current .city {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+#widget-current .temp-main {
+    font-size: 86px;
+    font-weight: 200;
+    line-height: 1;
+    margin: 20px 0;
+}
+
+#widget-current .temp-details {
+    font-size: 20px;
+    color: #a0a0a5;
+}
+
+.hourly-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.hourly-day-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #007aff;
+}
+
+.btn-now {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.2s;
+}
+
+.btn-now:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hourly-container {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    flex: 1;
+}
+
+.hourly-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.hourly-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.hourly-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.hour-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    text-align: center;
+    margin-right: 25px;
+}
+
+.hour-item:last-child {
+    margin-right: 0;
+}
+
+.hour-time {
+    font-size: 15px;
+    color: #a0a0a5;
+}
+
+.hour-icon {
+    font-size: 32px;
+    margin: 12px 0;
+}
+
+.hour-temp {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.hour-reason {
+    font-size: 13px;
+    color: #a0a0a5;
+    margin-top: 8px;
+    line-height: 1.2;
+}
+
+.activity-widget h3 {
+    font-size: 18px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.status-good { color: #32d74b; }
+.status-moderate { color: #ffd60a; }
+.status-poor { color: #ff453a; }
